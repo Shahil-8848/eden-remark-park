@@ -8,9 +8,11 @@ interface SidebarProps {
   selectedClass: number | null;
   onClassSelect: (classNumber: number) => void;
   onDashboardSelect: () => void;
+  profile: any;
+  onSignOut: () => void;
 }
 
-const Sidebar = ({ selectedClass, onClassSelect, onDashboardSelect }: SidebarProps) => {
+const Sidebar = ({ selectedClass, onClassSelect, onDashboardSelect, profile, onSignOut }: SidebarProps) => {
   const classes = Array.from({ length: 10 }, (_, i) => i + 1);
 
   return (
@@ -69,12 +71,23 @@ const Sidebar = ({ selectedClass, onClassSelect, onDashboardSelect }: SidebarPro
         </ScrollArea>
       </div>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-border">
-        <div className="text-xs text-muted-foreground text-center">
-          Logged in as: Mrs. Sarah Johnson
+        {/* Footer */}
+        <div className="p-4 border-t space-y-2">
+          <p className="text-sm text-muted-foreground">
+            {profile?.full_name}
+          </p>
+          <p className="text-xs text-muted-foreground capitalize">
+            {profile?.role}
+          </p>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onSignOut}
+            className="w-full"
+          >
+            Sign Out
+          </Button>
         </div>
-      </div>
     </div>
   );
 };

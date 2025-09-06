@@ -3,7 +3,13 @@ import { Badge } from '@/components/ui/badge';
 import { Users, GraduationCap, MessageCircle, TrendingUp } from 'lucide-react';
 import { mockClasses } from '@/data/mockData';
 
-const DashboardOverview = () => {
+interface DashboardOverviewProps {
+  students: any[];
+  classes: any[];
+  userRole: 'teacher' | 'admin' | 'principal';
+}
+
+const DashboardOverview = ({ students, classes, userRole }: DashboardOverviewProps) => {
   const totalStudents = mockClasses.reduce((acc, cls) => acc + cls.students.length, 0);
   const totalClasses = mockClasses.length;
   const totalRemarks = mockClasses.reduce((acc, cls) => 

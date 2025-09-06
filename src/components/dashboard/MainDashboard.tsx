@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { Student, Remark } from '@/types';
-import { mockClasses, mockTeacher } from '@/data/mockData';
+import { useAuth } from '@/hooks/useAuth';
+import { useStudents } from '@/hooks/useStudents';
 import Sidebar from './Sidebar';
 import StudentList from './StudentList';
 import RemarksModal from './RemarksModal';
 import DashboardOverview from './DashboardOverview';
 
 const MainDashboard = () => {
+  const { profile, signOut } = useAuth();
+  const { students, classes, loading, addRemark, getStudentsByClass } = useStudents();
   const [selectedClass, setSelectedClass] = useState<number | null>(null);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [classData, setClassData] = useState(mockClasses);
 
   const handleClassSelect = (classNumber: number) => {
     setSelectedClass(classNumber);
@@ -20,44 +21,28 @@ const MainDashboard = () => {
     setSelectedClass(null);
   };
 
-  const handleAddRemark = (student: Student) => {
+  const handleAddRemark = (student: any) => {
     setSelectedStudent(student);
     setIsModalOpen(true);
   };
 
-  const handleSubmitRemark = (studentId: string, rating: number, tags: string[], notes: string) => {
-    const newRemark: Remark = {
-      id: Date.now().toString(),
-      teacherId: mockTeacher.id,
-      teacherName: mockTeacher.name,
-      rating,
-      tags,
-      notes,
-      date: new Date(),
-      isFromHigherAdmin: false
-    };
-
-    setClassData(prevClasses =>
-      prevClasses.map(cls => ({
-        ...cls,
-        students: cls.students.map(student =>
-          student.id === studentId
-            ? {
-                ...student,
-                remarks: [...student.remarks, newRemark],
-                averageRating: [...student.remarks, newRemark].reduce((acc, remark) => acc + remark.rating, 0) / [...student.remarks, newRemark].length
-              }
-            : student
-        )
-      }))
-    );
+  const handleSubmitRemark = async (studentId: string, rating: number, tags: string[], notes: string) => {
+    await addRemark(studentId, rating, tags, notes);
+    setIsModalOpen(false);
   };
 
   const getCurrentStudents = () => {
     if (!selectedClass) return [];
-    const currentClass = classData.find(cls => cls.number === selectedClass);
-    return currentClass ? currentClass.students : [];
+    return getStudentsByClass(selectedClass);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-background">
@@ -66,6 +51,8 @@ const MainDashboard = () => {
         selectedClass={selectedClass}
         onClassSelect={handleClassSelect}
         onDashboardSelect={handleDashboardSelect}
+        profile={profile}
+        onSignOut={signOut}
       />
 
       {/* Main Content */}
@@ -76,9 +63,14 @@ const MainDashboard = () => {
               classNumber={selectedClass}
               students={getCurrentStudents()}
               onAddRemark={handleAddRemark}
+              userRole={profile?.role || 'teacher'}
             />
           ) : (
-            <DashboardOverview />
+            <DashboardOverview 
+              students={students}
+              classes={classes}
+              userRole={profile?.role || 'teacher'}
+            />
           )}
         </div>
       </div>

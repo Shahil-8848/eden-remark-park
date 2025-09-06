@@ -8,14 +8,15 @@ import { useState } from 'react';
 
 interface StudentListProps {
   classNumber: number;
-  students: Student[];
-  onAddRemark: (student: Student) => void;
+  students: any[];
+  onAddRemark: (student: any) => void;
+  userRole: 'teacher' | 'admin' | 'principal';
 }
 
-const StudentList = ({ classNumber, students, onAddRemark }: StudentListProps) => {
+const StudentList = ({ classNumber, students, onAddRemark, userRole }: StudentListProps) => {
   const [expandedStudents, setExpandedStudents] = useState<Set<string>>(new Set());
-  const sectionA = students.filter(s => s.section === 'A');
-  const sectionB = students.filter(s => s.section === 'B');
+  const sectionA = students.filter(s => s.classes?.section === 'A');
+  const sectionB = students.filter(s => s.classes?.section === 'B');
 
   const toggleStudentRemarks = (studentId: string) => {
     const newExpanded = new Set(expandedStudents);
@@ -45,7 +46,7 @@ const StudentList = ({ classNumber, students, onAddRemark }: StudentListProps) =
     );
   };
 
-  const renderSection = (sectionStudents: Student[], sectionName: string) => (
+  const renderSection = (sectionStudents: any[], sectionName: string) => (
     <Card className="flex-1">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
@@ -68,7 +69,7 @@ const StudentList = ({ classNumber, students, onAddRemark }: StudentListProps) =
                     <div className="flex items-center gap-3">
                       <div className="font-medium">{student.name}</div>
                       <Badge variant="outline" className="text-xs">
-                        {student.rollNumber}
+                        {student.roll_number}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4 mt-1">
@@ -95,6 +96,7 @@ const StudentList = ({ classNumber, students, onAddRemark }: StudentListProps) =
                     size="sm"
                     onClick={() => onAddRemark(student)}
                     className="bg-primary hover:bg-primary-dark"
+                    disabled={userRole === 'teacher' ? false : false}
                   >
                     Add Remark
                   </Button>
@@ -110,22 +112,17 @@ const StudentList = ({ classNumber, students, onAddRemark }: StudentListProps) =
                       <div className="space-y-3">
                         <h4 className="text-sm font-medium text-foreground mb-2">Previous Remarks:</h4>
                         {student.remarks
-                          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                          .map((remark) => (
+                          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                          .map((remark: any) => (
                           <div key={remark.id} className="bg-background rounded-lg p-3 border">
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex items-center gap-2">
                                 <UserCircle className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm font-medium">{remark.teacherName}</span>
-                                {remark.isFromHigherAdmin && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    Admin
-                                  </Badge>
-                                )}
+                                <span className="text-sm font-medium">{remark.profiles?.full_name}</span>
                               </div>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                 <Calendar className="h-3 w-3" />
-                                {new Date(remark.date).toLocaleDateString()}
+                                {new Date(remark.created_at).toLocaleDateString()}
                               </div>
                             </div>
                             
