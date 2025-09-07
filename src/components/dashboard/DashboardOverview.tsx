@@ -38,7 +38,9 @@ const DashboardOverview = ({ students, classes, userRole }: DashboardOverviewPro
   const classStats = classes.map(cls => {
     const classStudents = students.filter(s => s.classes?.number === cls.number);
     return {
+      id: cls.id,
       number: cls.number,
+      section: cls.section,
       studentCount: classStudents.length,
       totalRemarks: classStudents.reduce((acc, student) => acc + student.remarks.length, 0),
       averageRating: classStudents.length > 0 
@@ -186,7 +188,7 @@ const DashboardOverview = ({ students, classes, userRole }: DashboardOverviewPro
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div>
-                    <h3 className="font-semibold">Class {stat.number}</h3>
+                    <h3 className="font-semibold">Class {stat.number} - Section {stat.section}</h3>
                     <div className="text-sm text-muted-foreground">
                       {stat.studentCount} students • {stat.totalRemarks} remarks
                     </div>

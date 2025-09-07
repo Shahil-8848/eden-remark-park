@@ -38,17 +38,21 @@ interface Class {
 }
 
 export const useStudents = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
+  const [assignedClasses, setAssignedClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
+    if (user && profile) {
       fetchClasses();
       fetchStudents();
+      if (profile.role === 'teacher') {
+        fetchAssignedClasses();
+      }
     }
-  }, [user]);
+  }, [user, profile]);
 
   const fetchClasses = async () => {
     const { data, error } = await supabase
@@ -64,9 +68,27 @@ export const useStudents = () => {
     }
   };
 
+  const fetchAssignedClasses = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('teacher_classes')
+      .select(`
+        classes (*)
+      `)
+      .eq('teacher_id', user.id);
+
+    if (error) {
+      console.error('Error fetching assigned classes:', error);
+    } else {
+      const assignedClassesData = data?.map((item: any) => item.classes).filter(Boolean) || [];
+      setAssignedClasses(assignedClassesData);
+    }
+  };
+
   const fetchStudents = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('students')
       .select(`
         *,
@@ -75,8 +97,17 @@ export const useStudents = () => {
           *,
           profiles (full_name)
         )
-      `)
-      .order('name');
+      `);
+
+    // For teachers, only fetch students from their assigned classes
+    if (profile?.role === 'teacher' && assignedClasses.length > 0) {
+      const assignedClassIds = assignedClasses.map(cls => cls.id);
+      query = query.in('class_id', assignedClassIds);
+    }
+
+    query = query.order('name');
+
+    const { data, error } = await query;
 
     if (error) {
       toast.error('Failed to fetch students');
@@ -120,12 +151,21 @@ export const useStudents = () => {
     return students.filter(student => student.classes?.number === classNumber);
   };
 
+  const getAccessibleClasses = () => {
+    if (profile?.role === 'teacher') {
+      return assignedClasses;
+    }
+    return classes;
+  };
+
   return {
     students,
     classes,
+    assignedClasses,
     loading,
     addRemark,
     getStudentsByClass,
+    getAccessibleClasses,
     refreshStudents: fetchStudents
   };
 };

@@ -5,10 +5,11 @@ import Sidebar from './Sidebar';
 import StudentList from './StudentList';
 import RemarksModal from './RemarksModal';
 import DashboardOverview from './DashboardOverview';
+import TeacherDashboard from './TeacherDashboard';
 
 const MainDashboard = () => {
   const { profile, signOut } = useAuth();
-  const { students, classes, loading, addRemark, getStudentsByClass } = useStudents();
+  const { students, classes, loading, addRemark, getStudentsByClass, getAccessibleClasses } = useStudents();
   const [selectedClass, setSelectedClass] = useState<number | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,6 +54,7 @@ const MainDashboard = () => {
         onDashboardSelect={handleDashboardSelect}
         profile={profile}
         onSignOut={signOut}
+        accessibleClasses={getAccessibleClasses()}
       />
 
       {/* Main Content */}
@@ -66,11 +68,22 @@ const MainDashboard = () => {
               userRole={profile?.role || 'teacher'}
             />
           ) : (
-            <DashboardOverview 
-              students={students}
-              classes={classes}
-              userRole={profile?.role || 'teacher'}
-            />
+            // Only show dashboard overview for admin/principal
+            (profile?.role === 'admin' || profile?.role === 'principal') ? (
+              <DashboardOverview 
+                students={students}
+                classes={classes}
+                userRole={profile?.role || 'teacher'}
+              />
+            ) : (
+              // For teachers, show a simplified view or redirect to first class
+              <TeacherDashboard 
+                students={students}
+                classes={getAccessibleClasses()}
+                userRole={profile?.role || 'teacher'}
+                onClassSelect={handleClassSelect}
+              />
+            )
           )}
         </div>
       </div>
