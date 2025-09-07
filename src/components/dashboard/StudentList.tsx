@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Star, MessageCircle, User, ChevronDown, Calendar, UserCircle } from 'lucide-react';
 import { useState } from 'react';
+import ClassRemarksHistory from './ClassRemarksHistory';
 
 interface StudentListProps {
   classNumber: number;
@@ -168,10 +169,17 @@ const StudentList = ({ classNumber, students, onAddRemark, userRole }: StudentLi
         </Badge>
       </div>
       
-      <div className="flex gap-6">
+      <div className="flex gap-6 mb-6">
         {renderSection(sectionA, 'A')}
         {renderSection(sectionB, 'B')}
       </div>
+      
+      {/* Class Remarks History */}
+      <ClassRemarksHistory 
+        students={students} 
+        classNumber={classNumber} 
+        section="A" 
+      />
     </div>
   );
 };
