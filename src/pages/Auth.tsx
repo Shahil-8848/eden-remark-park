@@ -25,9 +25,8 @@ const Auth = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const fullName = formData.get('fullName') as string;
-    const role = formData.get('role') as 'teacher' | 'admin' | 'principal';
     
-    await signUp(email, password, fullName, role);
+    await signUp(email, password, fullName);
     setIsLoading(false);
   };
 
@@ -130,19 +129,6 @@ const Auth = () => {
                     placeholder="Create a password"
                     required
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select name="role" defaultValue="teacher">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="teacher">Teacher</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="principal">Principal</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
                 <Button 
                   type="submit" 

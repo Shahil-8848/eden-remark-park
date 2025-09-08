@@ -1,9 +1,10 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import MainDashboard from '@/components/dashboard/MainDashboard';
+import ApprovalPending from './ApprovalPending';
 
 const Index = () => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
 
   if (loading) {
     return (
@@ -15,6 +16,11 @@ const Index = () => {
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Check approval status
+  if (profile && profile.approval_status !== 'approved') {
+    return <ApprovalPending />;
   }
 
   return <MainDashboard />;

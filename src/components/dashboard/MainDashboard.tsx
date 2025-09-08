@@ -6,11 +6,14 @@ import StudentList from './StudentList';
 import RemarksModal from './RemarksModal';
 import DashboardOverview from './DashboardOverview';
 import TeacherDashboard from './TeacherDashboard';
+import UserManagement from './UserManagement';
+import TeacherAssignment from './TeacherAssignment';
 
 const MainDashboard = () => {
   const { profile, signOut } = useAuth();
   const { students, classes, loading, addRemark, getStudentsByClass, getAccessibleClasses } = useStudents();
   const [selectedClass, setSelectedClass] = useState<number | null>(null);
+  const [selectedView, setSelectedView] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -20,6 +23,12 @@ const MainDashboard = () => {
 
   const handleDashboardSelect = () => {
     setSelectedClass(null);
+    setSelectedView(null);
+  };
+
+  const handleViewSelect = (view: string) => {
+    setSelectedClass(null);
+    setSelectedView(view);
   };
 
   const handleAddRemark = (student: any) => {
@@ -50,8 +59,10 @@ const MainDashboard = () => {
       {/* Sidebar */}
       <Sidebar
         selectedClass={selectedClass}
+        selectedView={selectedView}
         onClassSelect={handleClassSelect}
         onDashboardSelect={handleDashboardSelect}
+        onViewSelect={handleViewSelect}
         profile={profile}
         onSignOut={signOut}
         accessibleClasses={getAccessibleClasses()}
@@ -60,7 +71,11 @@ const MainDashboard = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="p-6">
-          {selectedClass ? (
+          {selectedView === 'user-management' ? (
+            <UserManagement />
+          ) : selectedView === 'teacher-assignment' ? (
+            <TeacherAssignment />
+          ) : selectedClass ? (
             <StudentList
               classNumber={selectedClass}
               students={getCurrentStudents()}

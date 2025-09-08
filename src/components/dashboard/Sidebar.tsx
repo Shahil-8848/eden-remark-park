@@ -1,19 +1,21 @@
 import { useState } from 'react';
-import { GraduationCap, Users, Home } from 'lucide-react';
+import { GraduationCap, Users, Home, UserCheck, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface SidebarProps {
   selectedClass: number | null;
+  selectedView: string | null;
   onClassSelect: (classNumber: number) => void;
   onDashboardSelect: () => void;
+  onViewSelect: (view: string) => void;
   profile: any;
   onSignOut: () => void;
   accessibleClasses: any[];
 }
 
-const Sidebar = ({ selectedClass, onClassSelect, onDashboardSelect, profile, onSignOut, accessibleClasses }: SidebarProps) => {
+const Sidebar = ({ selectedClass, selectedView, onClassSelect, onDashboardSelect, onViewSelect, profile, onSignOut, accessibleClasses }: SidebarProps) => {
 
   return (
     <div className="w-64 bg-card border-r border-border h-full flex flex-col">
@@ -37,13 +39,43 @@ const Sidebar = ({ selectedClass, onClassSelect, onDashboardSelect, profile, onS
             {/* Dashboard */}
             {(profile?.role === 'admin' || profile?.role === 'principal') && (
               <Button
-                variant={selectedClass === null ? "secondary" : "ghost"}
+                variant={selectedClass === null && selectedView === null ? "secondary" : "ghost"}
                 className="w-full justify-start"
                 onClick={onDashboardSelect}
               >
                 <Home className="h-4 w-4 mr-3" />
                 Dashboard
               </Button>
+            )}
+
+            {/* Admin Management */}
+            {profile?.role === 'admin' && (
+              <>
+                <div className="pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Settings className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-muted-foreground">Management</span>
+                  </div>
+                  <div className="space-y-1">
+                    <Button
+                      variant={selectedView === 'user-management' ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => onViewSelect('user-management')}
+                    >
+                      <UserCheck className="h-4 w-4 mr-3" />
+                      User Approvals
+                    </Button>
+                    <Button
+                      variant={selectedView === 'teacher-assignment' ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => onViewSelect('teacher-assignment')}
+                    >
+                      <GraduationCap className="h-4 w-4 mr-3" />
+                      Teacher Assignment
+                    </Button>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Class Navigation */}
@@ -71,7 +103,7 @@ const Sidebar = ({ selectedClass, onClassSelect, onDashboardSelect, profile, onS
                       )}
                       onClick={() => onClassSelect(cls.number)}
                     >
-                      Class {cls.number} - {cls.section}
+                      Class {cls.number}-{cls.section}
                     </Button>
                   ))
                 )}

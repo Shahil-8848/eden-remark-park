@@ -8,6 +8,7 @@ interface Profile {
   user_id: string;
   full_name: string;
   role: 'teacher' | 'admin' | 'principal';
+  approval_status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;
 }
@@ -17,7 +18,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, role?: 'teacher' | 'admin' | 'principal') => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -45,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               .select('*')
               .eq('user_id', session.user.id)
               .single();
-            setProfile(profileData);
+            setProfile(profileData as Profile);
           }, 0);
         } else {
           setProfile(null);
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .eq('user_id', session.user.id)
           .single()
           .then(({ data: profileData }) => {
-            setProfile(profileData);
+            setProfile(profileData as Profile);
             setLoading(false);
           });
       } else {
@@ -77,7 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, role: 'teacher' | 'admin' | 'principal' = 'teacher') => {
+  const signUp = async (email: string, password: string, fullName: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -86,8 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          full_name: fullName,
-          role: role
+          full_name: fullName
         }
       }
     });
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success('Please check your email to confirm your account');
+      toast.success('Account created! Please wait for admin approval to access the system.');
     }
     
     return { error };
