@@ -47,12 +47,20 @@ export const useStudents = () => {
   useEffect(() => {
     if (user && profile) {
       fetchClasses();
-      fetchStudents();
       if (profile.role === 'teacher') {
         fetchAssignedClasses();
+      } else {
+        fetchStudents();
       }
     }
   }, [user, profile]);
+
+  // Separate effect for teachers to fetch students after assigned classes are loaded
+  useEffect(() => {
+    if (user && profile?.role === 'teacher' && assignedClasses.length >= 0) {
+      fetchStudents();
+    }
+  }, [assignedClasses, user, profile]);
 
   const fetchClasses = async () => {
     const { data, error } = await supabase
@@ -86,6 +94,7 @@ export const useStudents = () => {
     }
   };
 
+  // For teachers, only fetch students from their assigned classes after assignedClasses are loaded
   const fetchStudents = async () => {
     setLoading(true);
     let query = supabase
@@ -100,7 +109,13 @@ export const useStudents = () => {
       `);
 
     // For teachers, only fetch students from their assigned classes
-    if (profile?.role === 'teacher' && assignedClasses.length > 0) {
+    if (profile?.role === 'teacher') {
+      // Wait for assigned classes to be loaded
+      if (assignedClasses.length === 0) {
+        setStudents([]);
+        setLoading(false);
+        return;
+      }
       const assignedClassIds = assignedClasses.map(cls => cls.id);
       query = query.in('class_id', assignedClassIds);
     }

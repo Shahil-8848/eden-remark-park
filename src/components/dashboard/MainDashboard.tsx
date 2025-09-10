@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useStudents } from '@/hooks/useStudents';
-import Sidebar from './Sidebar';
+import AppSidebar from './Sidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { GraduationCap } from 'lucide-react';
 import StudentList from './StudentList';
 import RemarksModal from './RemarksModal';
 import DashboardOverview from './DashboardOverview';
@@ -55,62 +57,80 @@ const MainDashboard = () => {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <Sidebar
-        selectedClass={selectedClass}
-        selectedView={selectedView}
-        onClassSelect={handleClassSelect}
-        onDashboardSelect={handleDashboardSelect}
-        onViewSelect={handleViewSelect}
-        profile={profile}
-        onSignOut={signOut}
-        accessibleClasses={getAccessibleClasses()}
-      />
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex min-h-screen w-full bg-background">
+        {/* Global trigger in header */}
+        <header className="fixed top-0 left-0 right-0 z-50 h-12 flex items-center bg-background border-b border-border lg:hidden">
+          <SidebarTrigger className="ml-2" />
+          <div className="flex items-center gap-2 ml-4">
+            <div className="p-1 bg-primary/10 rounded">
+              <GraduationCap className="h-4 w-4 text-primary" />
+            </div>
+            <span className="font-semibold">School Portal</span>
+          </div>
+        </header>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-6">
-          {selectedView === 'user-management' ? (
-            <UserManagement />
-          ) : selectedView === 'teacher-assignment' ? (
-            <TeacherAssignment />
-          ) : selectedClass ? (
-            <StudentList
-              classNumber={selectedClass}
-              students={getCurrentStudents()}
-              onAddRemark={handleAddRemark}
-              userRole={profile?.role || 'teacher'}
-            />
-          ) : (
-            // Only show dashboard overview for admin/principal
-            (profile?.role === 'admin' || profile?.role === 'principal') ? (
-              <DashboardOverview 
-                students={students}
-                classes={classes}
+        {/* Sidebar */}
+        <AppSidebar
+          selectedClass={selectedClass}
+          selectedView={selectedView}
+          onClassSelect={handleClassSelect}
+          onDashboardSelect={handleDashboardSelect}
+          onViewSelect={handleViewSelect}
+          profile={profile}
+          onSignOut={signOut}
+          accessibleClasses={getAccessibleClasses()}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto">
+          {/* Desktop trigger */}
+          <div className="hidden lg:flex items-center h-12 border-b border-border px-4">
+            <SidebarTrigger />
+          </div>
+          
+          <div className="p-4 pt-16 lg:pt-4">
+            {selectedView === 'user-management' ? (
+              <UserManagement />
+            ) : selectedView === 'teacher-assignment' ? (
+              <TeacherAssignment />
+            ) : selectedClass ? (
+              <StudentList
+                classNumber={selectedClass}
+                students={getCurrentStudents()}
+                onAddRemark={handleAddRemark}
                 userRole={profile?.role || 'teacher'}
               />
             ) : (
-              // For teachers, show a simplified view or redirect to first class
-              <TeacherDashboard 
-                students={students}
-                classes={getAccessibleClasses()}
-                userRole={profile?.role || 'teacher'}
-                onClassSelect={handleClassSelect}
-              />
-            )
-          )}
-        </div>
-      </div>
+              // Only show dashboard overview for admin/principal
+              (profile?.role === 'admin' || profile?.role === 'principal') ? (
+                <DashboardOverview 
+                  students={students}
+                  classes={classes}
+                  userRole={profile?.role || 'teacher'}
+                />
+              ) : (
+                // For teachers, show a simplified view or redirect to first class
+                <TeacherDashboard 
+                  students={students}
+                  classes={getAccessibleClasses()}
+                  userRole={profile?.role || 'teacher'}
+                  onClassSelect={handleClassSelect}
+                />
+              )
+            )}
+          </div>
+        </main>
 
-      {/* Remarks Modal */}
-      <RemarksModal
-        student={selectedStudent}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleSubmitRemark}
-      />
-    </div>
+        {/* Remarks Modal */}
+        <RemarksModal
+          student={selectedStudent}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSubmit={handleSubmitRemark}
+        />
+      </div>
+    </SidebarProvider>
   );
 };
 

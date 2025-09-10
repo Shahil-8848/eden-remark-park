@@ -48,7 +48,7 @@ const StudentList = ({ classNumber, students, onAddRemark, userRole }: StudentLi
   };
 
   const renderSection = (sectionStudents: any[], sectionName: string) => (
-    <Card className="flex-1">
+    <Card className="flex-1 min-w-0">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <div className="p-1 bg-primary/10 rounded">
@@ -65,21 +65,21 @@ const StudentList = ({ classNumber, students, onAddRemark, userRole }: StudentLi
           {sectionStudents.map((student) => (
             <Collapsible key={student.id}>
               <div className="rounded-lg border">
-                <div className="flex items-center justify-between p-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="font-medium">{student.name}</div>
-                      <Badge variant="outline" className="text-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                      <div className="font-medium truncate">{student.name}</div>
+                      <Badge variant="outline" className="text-xs w-fit">
                         {student.roll_number}
                       </Badge>
                     </div>
-                    <div className="flex items-center gap-4 mt-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2">
                       {renderStarRating(student.averageRating)}
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground p-0 h-auto"
+                          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground p-0 h-auto w-fit"
                           onClick={() => toggleStudentRemarks(student.id)}
                         >
                           <MessageCircle className="h-3 w-3" />
@@ -96,7 +96,7 @@ const StudentList = ({ classNumber, students, onAddRemark, userRole }: StudentLi
                   <Button 
                     size="sm"
                     onClick={() => onAddRemark(student)}
-                    className="bg-primary hover:bg-primary-dark"
+                    className="bg-primary hover:bg-primary-dark w-full sm:w-auto"
                     disabled={userRole === 'teacher' ? false : false}
                   >
                     Add Remark
@@ -161,15 +161,15 @@ const StudentList = ({ classNumber, students, onAddRemark, userRole }: StudentLi
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Class {classNumber} Students</h1>
-        <Badge variant="secondary" className="text-sm">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h1 className="text-xl sm:text-2xl font-semibold">Class {classNumber} Students</h1>
+        <Badge variant="secondary" className="text-sm w-fit">
           Total: {students.length} Students
         </Badge>
       </div>
       
-      <div className="flex gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
         {renderSection(sectionA, 'A')}
         {renderSection(sectionB, 'B')}
       </div>
