@@ -81,26 +81,58 @@ const TeacherAssignment = () => {
   };
 
   const fetchAssignments = async () => {
-    const { data, error } = await supabase
-      .from('teacher_classes')
-      .select(`
-        *,
-        profiles!teacher_classes_teacher_id_fkey(full_name),
-        classes!teacher_classes_class_id_fkey(number, section)
-      `);
+    try {
+      // Fetch assignments without foreign key joins
+      const { data: assignmentData, error: assignmentError } = await supabase
+        .from('teacher_classes')
+        .select('*');
 
-    if (error) {
-      toast.error('Failed to fetch assignments');
-      console.error(error);
-    } else {
-      const formattedAssignments = (data || []).map((assignment: any) => ({
-        id: assignment.id,
-        teacher_id: assignment.teacher_id,
-        class_id: assignment.class_id,
-        teacher_name: assignment.profiles?.full_name || 'Unknown',
-        class_info: `Class ${assignment.classes?.number}-${assignment.classes?.section}`
-      }));
+      if (assignmentError) {
+        console.error('Error fetching assignments:', assignmentError);
+        toast.error('Failed to fetch assignments');
+        return;
+      }
+
+      if (!assignmentData || assignmentData.length === 0) {
+        setAssignments([]);
+        return;
+      }
+
+      // Get unique teacher and class IDs
+      const teacherIds = [...new Set(assignmentData.map(a => a.teacher_id))];
+      const classIds = [...new Set(assignmentData.map(a => a.class_id))];
+
+      // Fetch teacher profiles manually
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', teacherIds);
+
+      // Fetch classes manually
+      const { data: classData } = await supabase
+        .from('classes')
+        .select('*')
+        .in('id', classIds);
+
+      // Combine data manually
+      const formattedAssignments = assignmentData.map((assignment: any) => {
+        const profile = profileData?.find(p => p.user_id === assignment.teacher_id);
+        const classInfo = classData?.find(c => c.id === assignment.class_id);
+        
+        return {
+          id: assignment.id,
+          teacher_id: assignment.teacher_id,
+          class_id: assignment.class_id,
+          teacher_name: profile?.full_name || 'Unknown Teacher',
+          class_info: `Class ${classInfo?.number || 0}-${classInfo?.section || 'Unknown'}`
+        };
+      });
+
       setAssignments(formattedAssignments);
+    } catch (error) {
+      console.error('Error in fetchAssignments:', error);
+      toast.error('Failed to fetch assignments');
+      setAssignments([]);
     }
   };
 
@@ -200,11 +232,11 @@ const TeacherAssignment = () => {
                 <SelectValue placeholder="Choose a teacher..." />
               </SelectTrigger>
               <SelectContent>
-                {teachers.map((teacher) => (
-                  <SelectItem key={teacher.id} value={teacher.id}>
-                    {teacher.full_name}
-                  </SelectItem>
-                ))}
+                 {teachers.map((teacher) => (
+                   <SelectItem key={teacher.user_id} value={teacher.user_id}>
+                     {teacher.full_name}
+                   </SelectItem>
+                 ))}
               </SelectContent>
             </Select>
           </div>
@@ -262,10 +294,10 @@ const TeacherAssignment = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {teachers.map((teacher) => {
-                const teacherAssignments = getTeacherAssignments(teacher.id);
-                return (
-                  <div key={teacher.id} className="border rounded-lg p-4">
+               {teachers.map((teacher) => {
+                 const teacherAssignments = getTeacherAssignments(teacher.user_id);
+                 return (
+                   <div key={teacher.user_id} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <h3 className="font-medium">{teacher.full_name}</h3>
