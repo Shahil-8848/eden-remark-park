@@ -11,7 +11,7 @@ interface StudentListProps {
   classNumber: number;
   students: any[];
   onAddRemark: (student: any) => void;
-  userRole: 'teacher' | 'admin' | 'principal';
+  userRole: 'teacher' | 'admin' | 'principal' | 'superadmin';
 }
 
 const StudentList = ({ classNumber, students, onAddRemark, userRole }: StudentListProps) => {

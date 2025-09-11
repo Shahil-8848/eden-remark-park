@@ -22,7 +22,7 @@ export interface Remark {
 export interface Teacher {
   id: string;
   name: string;
-  role: 'teacher' | 'principal' | 'super_admin';
+  role: 'teacher' | 'principal' | 'admin' | 'superadmin';
   classes: number[];
 }
 

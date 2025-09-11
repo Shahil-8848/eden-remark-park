@@ -55,7 +55,7 @@ const AppSidebar = ({ selectedClass, selectedView, onClassSelect, onDashboardSel
           <ScrollArea className="h-full">
             <div className="space-y-2">
               {/* Dashboard */}
-              {(profile?.role === 'admin' || profile?.role === 'principal') && (
+              {(profile?.role === 'admin' || profile?.role === 'principal' || profile?.role === 'superadmin') && (
                 <SidebarGroup>
                   <SidebarMenu>
                     <SidebarMenuItem>
@@ -78,7 +78,7 @@ const AppSidebar = ({ selectedClass, selectedView, onClassSelect, onDashboardSel
               )}
 
               {/* Admin Management */}
-              {profile?.role === 'admin' && (
+              {(profile?.role === 'admin' || profile?.role === 'superadmin') && (
                 <SidebarGroup>
                   {open && (
                     <SidebarGroupLabel className="flex items-center gap-2">
@@ -115,6 +115,37 @@ const AppSidebar = ({ selectedClass, selectedView, onClassSelect, onDashboardSel
                           >
                             <GraduationCap className="h-4 w-4" />
                             {open && <span className="ml-3">Teacher Assignment</span>}
+                          </Button>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              )}
+
+              {/* Advanced Features for Admin/Principal/Superadmin */}
+              {(profile?.role === 'admin' || profile?.role === 'principal' || profile?.role === 'superadmin') && (
+                <SidebarGroup>
+                  {open && (
+                    <SidebarGroupLabel className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Student Analytics
+                    </SidebarGroupLabel>
+                  )}
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton 
+                          asChild
+                          isActive={selectedView === 'student-search'}
+                        >
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start"
+                            onClick={() => onViewSelect('student-search')}
+                          >
+                            <Users className="h-4 w-4" />
+                            {open && <span className="ml-3">Student Search</span>}
                           </Button>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

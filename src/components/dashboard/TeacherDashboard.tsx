@@ -6,7 +6,7 @@ import { Users, MessageCircle, Star, UserCircle, Calendar, BookOpen, TrendingUp 
 interface TeacherDashboardProps {
   students: any[];
   classes: any[];
-  userRole: 'teacher' | 'admin' | 'principal';
+  userRole: 'teacher' | 'admin' | 'principal' | 'superadmin';
   onClassSelect: (classNumber: number) => void;
 }
 

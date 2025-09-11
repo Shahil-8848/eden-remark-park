@@ -10,6 +10,7 @@ import DashboardOverview from './DashboardOverview';
 import TeacherDashboard from './TeacherDashboard';
 import UserManagement from './UserManagement';
 import TeacherAssignment from './TeacherAssignment';
+import StudentSearch from './StudentSearch';
 
 const MainDashboard = () => {
   const { profile, signOut } = useAuth();
@@ -41,6 +42,12 @@ const MainDashboard = () => {
   const handleSubmitRemark = async (studentId: string, rating: number, tags: string[], notes: string) => {
     await addRemark(studentId, rating, tags, notes);
     setIsModalOpen(false);
+  };
+
+  const handleClassClick = (classNumber: number, section: string) => {
+    // Find the class and navigate to it in the sidebar
+    setSelectedClass(classNumber);
+    setSelectedView(null); // Clear view to show students
   };
 
   const getCurrentStudents = () => {
@@ -94,27 +101,33 @@ const MainDashboard = () => {
               <UserManagement />
             ) : selectedView === 'teacher-assignment' ? (
               <TeacherAssignment />
+            ) : selectedView === 'student-search' ? (
+              <StudentSearch 
+                students={students}
+                classes={classes}
+              />
             ) : selectedClass ? (
               <StudentList
                 classNumber={selectedClass}
                 students={getCurrentStudents()}
                 onAddRemark={handleAddRemark}
-                userRole={profile?.role || 'teacher'}
+                  userRole={(profile?.role as 'teacher' | 'admin' | 'principal' | 'superadmin') || 'teacher'}
               />
             ) : (
-              // Only show dashboard overview for admin/principal
-              (profile?.role === 'admin' || profile?.role === 'principal') ? (
+              // Only show dashboard overview for admin/principal/superadmin
+              (profile?.role === 'admin' || profile?.role === 'principal' || profile?.role === 'superadmin') ? (
                 <DashboardOverview 
                   students={students}
                   classes={classes}
-                  userRole={profile?.role || 'teacher'}
+                  userRole={(profile?.role as 'teacher' | 'admin' | 'principal' | 'superadmin') || 'teacher'}
+                  onClassClick={handleClassClick}
                 />
               ) : (
                 // For teachers, show a simplified view or redirect to first class
                 <TeacherDashboard 
                   students={students}
                   classes={getAccessibleClasses()}
-                  userRole={profile?.role || 'teacher'}
+                  userRole={(profile?.role as 'teacher' | 'admin' | 'principal' | 'superadmin') || 'teacher'}
                   onClassSelect={handleClassSelect}
                 />
               )

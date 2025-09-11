@@ -7,7 +7,7 @@ interface Profile {
   id: string;
   user_id: string;
   full_name: string;
-  role: 'teacher' | 'admin' | 'principal';
+  role: 'teacher' | 'admin' | 'principal' | 'superadmin';
   approval_status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   updated_at: string;

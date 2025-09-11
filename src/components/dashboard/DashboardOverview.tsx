@@ -8,10 +8,11 @@ import { useState } from 'react';
 interface DashboardOverviewProps {
   students: any[];
   classes: any[];
-  userRole: 'teacher' | 'admin' | 'principal';
+  userRole: 'teacher' | 'admin' | 'principal' | 'superadmin';
+  onClassClick?: (classNumber: number, section: string) => void;
 }
 
-const DashboardOverview = ({ students, classes, userRole }: DashboardOverviewProps) => {
+const DashboardOverview = ({ students, classes, userRole, onClassClick }: DashboardOverviewProps) => {
   const [selectedClassFilter, setSelectedClassFilter] = useState<string>('all');
   
   const totalStudents = students.length;
@@ -245,7 +246,8 @@ const DashboardOverview = ({ students, classes, userRole }: DashboardOverviewPro
                 .map((stat) => (
                 <div
                   key={stat.number}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                  onClick={() => onClassClick?.(stat.number, stat.section)}
                 >
                   <div className="flex-1">
                     <h3 className="font-semibold">Class {stat.number} - Section {stat.section}</h3>
