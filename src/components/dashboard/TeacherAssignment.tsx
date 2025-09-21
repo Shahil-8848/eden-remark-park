@@ -1,12 +1,24 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from 'sonner';
-import { Users, GraduationCap, Plus, Trash2 } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+import { Users, GraduationCap, Plus, Trash2 } from "lucide-react";
 
 interface Teacher {
   id: string;
@@ -33,7 +45,7 @@ const TeacherAssignment = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [classes, setClasses] = useState<Class[]>([]);
   const [assignments, setAssignments] = useState<TeacherAssignment[]>([]);
-  const [selectedTeacher, setSelectedTeacher] = useState<string>('');
+  const [selectedTeacher, setSelectedTeacher] = useState<string>("");
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,24 +54,20 @@ const TeacherAssignment = () => {
   }, []);
 
   const fetchData = async () => {
-    await Promise.all([
-      fetchTeachers(),
-      fetchClasses(),
-      fetchAssignments()
-    ]);
+    await Promise.all([fetchTeachers(), fetchClasses(), fetchAssignments()]);
     setLoading(false);
   };
 
   const fetchTeachers = async () => {
     const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('role', 'teacher')
-      .eq('approval_status', 'approved')
-      .order('full_name');
+      .from("profiles")
+      .select("*")
+      .eq("role", "teacher")
+      .eq("approval_status", "approved")
+      .order("full_name");
 
     if (error) {
-      toast.error('Failed to fetch teachers');
+      toast.error("Failed to fetch teachers");
       console.error(error);
     } else {
       setTeachers(data || []);
@@ -68,12 +76,12 @@ const TeacherAssignment = () => {
 
   const fetchClasses = async () => {
     const { data, error } = await supabase
-      .from('classes')
-      .select('*')
-      .order('number', { ascending: true });
+      .from("classes")
+      .select("*")
+      .order("number", { ascending: true });
 
     if (error) {
-      toast.error('Failed to fetch classes');
+      toast.error("Failed to fetch classes");
       console.error(error);
     } else {
       setClasses(data || []);
@@ -84,12 +92,12 @@ const TeacherAssignment = () => {
     try {
       // Fetch assignments without foreign key joins
       const { data: assignmentData, error: assignmentError } = await supabase
-        .from('teacher_classes')
-        .select('*');
+        .from("teacher_classes")
+        .select("*");
 
       if (assignmentError) {
-        console.error('Error fetching assignments:', assignmentError);
-        toast.error('Failed to fetch assignments');
+        console.error("Error fetching assignments:", assignmentError);
+        toast.error("Failed to fetch assignments");
         return;
       }
 
@@ -99,74 +107,76 @@ const TeacherAssignment = () => {
       }
 
       // Get unique teacher and class IDs
-      const teacherIds = [...new Set(assignmentData.map(a => a.teacher_id))];
-      const classIds = [...new Set(assignmentData.map(a => a.class_id))];
+      const teacherIds = [...new Set(assignmentData.map((a) => a.teacher_id))];
+      const classIds = [...new Set(assignmentData.map((a) => a.class_id))];
 
       // Fetch teacher profiles manually
       const { data: profileData } = await supabase
-        .from('profiles')
-        .select('user_id, full_name')
-        .in('user_id', teacherIds);
+        .from("profiles")
+        .select("user_id, full_name")
+        .in("user_id", teacherIds);
 
       // Fetch classes manually
       const { data: classData } = await supabase
-        .from('classes')
-        .select('*')
-        .in('id', classIds);
+        .from("classes")
+        .select("*")
+        .in("id", classIds);
 
       // Combine data manually
       const formattedAssignments = assignmentData.map((assignment: any) => {
-        const profile = profileData?.find(p => p.user_id === assignment.teacher_id);
-        const classInfo = classData?.find(c => c.id === assignment.class_id);
-        
+        const profile = profileData?.find(
+          (p) => p.user_id === assignment.teacher_id
+        );
+        const classInfo = classData?.find((c) => c.id === assignment.class_id);
+
         return {
           id: assignment.id,
           teacher_id: assignment.teacher_id,
           class_id: assignment.class_id,
-          teacher_name: profile?.full_name || 'Unknown Teacher',
-          class_info: `Class ${classInfo?.number || 0}-${classInfo?.section || 'Unknown'}`
+          teacher_name: profile?.full_name || "Unknown Teacher",
+          class_info: `Class ${classInfo?.number || 0}-${
+            classInfo?.section || "Unknown"
+          }`,
         };
       });
 
       setAssignments(formattedAssignments);
     } catch (error) {
-      console.error('Error in fetchAssignments:', error);
-      toast.error('Failed to fetch assignments');
+      console.error("Error in fetchAssignments:", error);
+      toast.error("Failed to fetch assignments");
       setAssignments([]);
     }
   };
 
   const handleClassToggle = (classId: string) => {
-    setSelectedClasses(prev => 
-      prev.includes(classId) 
-        ? prev.filter(id => id !== classId)
+    setSelectedClasses((prev) =>
+      prev.includes(classId)
+        ? prev.filter((id) => id !== classId)
         : [...prev, classId]
     );
   };
 
   const assignClasses = async () => {
     if (!selectedTeacher || selectedClasses.length === 0) {
-      toast.error('Please select a teacher and at least one class');
+      toast.error("Please select a teacher and at least one class");
       return;
     }
 
-    const assignmentPromises = selectedClasses.map(classId => 
-      supabase
-        .from('teacher_classes')
-        .insert({
-          teacher_id: selectedTeacher,
-          class_id: classId
-        })
+    const assignmentPromises = selectedClasses.map((classId) =>
+      supabase.from("teacher_classes").insert({
+        teacher_id: selectedTeacher,
+        class_id: classId,
+      })
     );
 
     const results = await Promise.all(assignmentPromises);
-    const hasErrors = results.some(result => result.error);
+    const hasErrors = results.some((result) => result.error);
 
     if (hasErrors) {
-      toast.error('Some assignments failed. Please check for duplicates.');
+      toast.error("Some assignments failed. Please check for duplicates.");
     } else {
       toast.success(`Assigned ${selectedClasses.length} classes to teacher`);
-      setSelectedTeacher('');
+      setSelectedTeacher("");
       setSelectedClasses([]);
       fetchAssignments();
     }
@@ -174,25 +184,32 @@ const TeacherAssignment = () => {
 
   const removeAssignment = async (assignmentId: string) => {
     const { error } = await supabase
-      .from('teacher_classes')
+      .from("teacher_classes")
       .delete()
-      .eq('id', assignmentId);
+      .eq("id", assignmentId);
 
     if (error) {
-      toast.error('Failed to remove assignment');
+      toast.error("Failed to remove assignment");
       console.error(error);
     } else {
-      toast.success('Assignment removed successfully');
+      toast.success("Assignment removed successfully");
       fetchAssignments();
     }
   };
 
   const getTeacherAssignments = (teacherId: string) => {
-    return assignments.filter(assignment => assignment.teacher_id === teacherId);
+    return assignments.filter(
+      (assignment) => assignment.teacher_id === teacherId
+    );
   };
 
-  const isClassAssigned = (classId: string) => {
-    return assignments.some(assignment => assignment.class_id === classId);
+  const isClassAssignedToCurrentTeacher = (classId: string) => {
+    if (!selectedTeacher) return false;
+    return assignments.some(
+      (assignment) =>
+        assignment.class_id === classId &&
+        assignment.teacher_id === selectedTeacher
+    );
   };
 
   if (loading) {
@@ -209,7 +226,9 @@ const TeacherAssignment = () => {
         <GraduationCap className="h-6 w-6" />
         <div>
           <h1 className="text-2xl font-bold">Teacher Class Assignment</h1>
-          <p className="text-muted-foreground">Assign teachers to specific classes and sections</p>
+          <p className="text-muted-foreground">
+            Assign teachers to specific classes and sections
+          </p>
         </div>
       </div>
 
@@ -226,44 +245,61 @@ const TeacherAssignment = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <label className="text-sm font-medium mb-2 block">Select Teacher</label>
+            <label className="text-sm font-medium mb-2 block">
+              Select Teacher
+            </label>
             <Select value={selectedTeacher} onValueChange={setSelectedTeacher}>
               <SelectTrigger>
                 <SelectValue placeholder="Choose a teacher..." />
               </SelectTrigger>
               <SelectContent>
-                 {teachers.map((teacher) => (
-                   <SelectItem key={teacher.user_id} value={teacher.user_id}>
-                     {teacher.full_name}
-                   </SelectItem>
-                 ))}
+                {teachers.map((teacher) => (
+                  <SelectItem key={teacher.user_id} value={teacher.user_id}>
+                    {teacher.full_name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Select Classes</label>
+            <label className="text-sm font-medium mb-2 block">
+              Select Classes
+            </label>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {classes.map((cls) => (
-                <div key={cls.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={cls.id}
-                    checked={selectedClasses.includes(cls.id)}
-                    onCheckedChange={() => handleClassToggle(cls.id)}
-                    disabled={isClassAssigned(cls.id)}
-                  />
-                  <label
-                    htmlFor={cls.id}
-                    className={`text-sm ${isClassAssigned(cls.id) ? 'text-muted-foreground line-through' : 'cursor-pointer'}`}
-                  >
-                    Class {cls.number}-{cls.section}
-                  </label>
-                </div>
-              ))}
+              {classes.map((cls) => {
+                const isAssignedToCurrentTeacher =
+                  isClassAssignedToCurrentTeacher(cls.id);
+                return (
+                  <div key={cls.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={cls.id}
+                      checked={selectedClasses.includes(cls.id)}
+                      onCheckedChange={() => handleClassToggle(cls.id)}
+                      disabled={isAssignedToCurrentTeacher}
+                    />
+                    <label
+                      htmlFor={cls.id}
+                      className={`text-sm ${
+                        isAssignedToCurrentTeacher
+                          ? "text-muted-foreground line-through"
+                          : "cursor-pointer"
+                      }`}
+                    >
+                      Class {cls.number}-{cls.section}
+                      {isAssignedToCurrentTeacher && (
+                        <span className="ml-1 text-xs">
+                          (Already assigned to this teacher)
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          <Button 
+          <Button
             onClick={assignClasses}
             disabled={!selectedTeacher || selectedClasses.length === 0}
             className="w-full"
@@ -290,30 +326,42 @@ const TeacherAssignment = () => {
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium">No Teachers Found</h3>
-              <p className="text-muted-foreground">No approved teachers are available for assignment.</p>
+              <p className="text-muted-foreground">
+                No approved teachers are available for assignment.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
-               {teachers.map((teacher) => {
-                 const teacherAssignments = getTeacherAssignments(teacher.user_id);
-                 return (
-                   <div key={teacher.user_id} className="border rounded-lg p-4">
+              {teachers.map((teacher) => {
+                const teacherAssignments = getTeacherAssignments(
+                  teacher.user_id
+                );
+                return (
+                  <div key={teacher.user_id} className="border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <h3 className="font-medium">{teacher.full_name}</h3>
-                        <p className="text-sm text-muted-foreground capitalize">{teacher.role}</p>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {teacher.role}
+                        </p>
                       </div>
                       <Badge variant="outline">
-                        {teacherAssignments.length} {teacherAssignments.length === 1 ? 'Class' : 'Classes'}
+                        {teacherAssignments.length}{" "}
+                        {teacherAssignments.length === 1 ? "Class" : "Classes"}
                       </Badge>
                     </div>
-                    
+
                     {teacherAssignments.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No classes assigned</p>
+                      <p className="text-sm text-muted-foreground">
+                        No classes assigned
+                      </p>
                     ) : (
                       <div className="flex flex-wrap gap-2">
                         {teacherAssignments.map((assignment) => (
-                          <div key={assignment.id} className="flex items-center gap-1 bg-muted px-3 py-1 rounded-md text-sm">
+                          <div
+                            key={assignment.id}
+                            className="flex items-center gap-1 bg-muted px-3 py-1 rounded-md text-sm"
+                          >
                             <span>{assignment.class_info}</span>
                             <Button
                               variant="ghost"
