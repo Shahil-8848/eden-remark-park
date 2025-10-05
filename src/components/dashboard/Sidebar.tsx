@@ -478,7 +478,7 @@ const AppSidebar = ({
         </div>
       </SidebarContent>
 
-      <style jsx>{`
+      <style>{`
         .scrollbar-hide {
           scrollbar-width: none;
           -ms-overflow-style: none;
