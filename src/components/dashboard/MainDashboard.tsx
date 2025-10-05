@@ -11,6 +11,8 @@ import TeacherDashboard from './TeacherDashboard';
 import UserManagement from './UserManagement';
 import TeacherAssignment from './TeacherAssignment';
 import StudentSearch from './StudentSearch';
+import TestManagement from './TestManagement';
+import TestResults from './TestResults';
 
 const MainDashboard = () => {
   const { profile, signOut } = useAuth();
@@ -106,6 +108,10 @@ const MainDashboard = () => {
                 students={students}
                 classes={classes}
               />
+            ) : selectedView === 'test-management' ? (
+              <TestManagement userId={profile?.user_id || ''} />
+            ) : selectedView === 'test-results' ? (
+              <TestResults />
             ) : selectedClass ? (
               <StudentList
                 classNumber={selectedClass}

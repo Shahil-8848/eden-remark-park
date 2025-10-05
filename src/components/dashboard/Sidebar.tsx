@@ -276,6 +276,58 @@ const AppSidebar = ({
                             </Button>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
+                        
+                        <SidebarMenuItem>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={selectedView === "test-management"}
+                          >
+                            <Button
+                              variant="ghost"
+                              className={cn(
+                                "w-full justify-start h-10 rounded-lg font-medium transition-all duration-200",
+                                "text-gray-600 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300",
+                                selectedView === "test-management" &&
+                                  "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 shadow-sm"
+                              )}
+                              onClick={() => onViewSelect("test-management")}
+                            >
+                              <GraduationCap className="h-4 w-4" />
+                              {open && (
+                                <span className="ml-3">Test Entry</span>
+                              )}
+                              {open && selectedView === "test-management" && (
+                                <div className="ml-auto h-2 w-2 bg-green-600 rounded-full"></div>
+                              )}
+                            </Button>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        
+                        <SidebarMenuItem>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={selectedView === "test-results"}
+                          >
+                            <Button
+                              variant="ghost"
+                              className={cn(
+                                "w-full justify-start h-10 rounded-lg font-medium transition-all duration-200",
+                                "text-gray-600 dark:text-gray-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-700 dark:hover:text-green-300",
+                                selectedView === "test-results" &&
+                                  "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 shadow-sm"
+                              )}
+                              onClick={() => onViewSelect("test-results")}
+                            >
+                              <BarChart3 className="h-4 w-4" />
+                              {open && (
+                                <span className="ml-3">Test Results</span>
+                              )}
+                              {open && selectedView === "test-results" && (
+                                <div className="ml-auto h-2 w-2 bg-green-600 rounded-full"></div>
+                              )}
+                            </Button>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
                       </SidebarMenu>
                     </SidebarGroupContent>
                   )}
