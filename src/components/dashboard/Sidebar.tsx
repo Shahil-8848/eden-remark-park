@@ -99,12 +99,12 @@ const AppSidebar = ({
   return (
     <Sidebar
       className={cn(
-        "transition-all duration-300 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-lg"
+        "transition-all duration-300 border-none"
       )}
     >
-      <SidebarContent className="flex flex-col h-full bg-white dark:bg-gray-900">
+      <SidebarContent className="flex flex-col h-full">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r  dark:from-gray-800 dark:to-gray-900">
+        <div className="p-4 border-b">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-600 rounded-xl shadow-md">
               <GraduationCap className="h-6 w-6 text-white" />
@@ -154,8 +154,11 @@ const AppSidebar = ({
         {/* Navigation Content */}
         <div className="flex-1 overflow-hidden">
           <div
-            className="h-full overflow-y-auto scrollbar-hide hover:scrollbar-default transition-all duration-200"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            className="h-full overflow-y-auto"
+            style={{ 
+              scrollbarWidth: "thin",
+              scrollbarColor: "hsl(var(--muted-foreground) / 0.3) transparent"
+            }}
           >
             <div className="p-3 space-y-2">
               {/* Dashboard */}
@@ -400,9 +403,9 @@ const AppSidebar = ({
               )}
 
               {/* Classes Section */}
-              <Separator className="my-2" />
+              <Separator className="my-3" />
               <SidebarGroup>
-                <div className="flex items-center justify-between px-2 py-1">
+                <div className="flex items-center justify-between px-2 py-2">
                   {open && (
                     <SidebarGroupLabel className="flex items-center gap-2 text-gray-600 dark:text-gray-400 font-semibold text-xs uppercase tracking-wide">
                       <Users className="h-4 w-4" />
@@ -494,11 +497,11 @@ const AppSidebar = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 space-y-3">
+        <div className="p-4 border-t space-y-3">
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 ring-2 ring-blue-200 dark:ring-gray-800">
+            <Avatar className="h-10 w-10 ring-2 ring-primary/20">
               <AvatarImage src={profile?.avatar} alt={profile?.full_name} />
-              <AvatarFallback className="bg-gray-400-600 text-white font-semibold">
+              <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                 {profile?.full_name
                   ?.split(" ")
                   .map((n) => n[0])
@@ -507,52 +510,24 @@ const AppSidebar = ({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+              <p className="text-sm font-semibold truncate">
                 {profile?.full_name}
               </p>
-              <span className={cn("text-xs mt-1", getRoleColor(profile?.role))}>
+              <Badge variant="secondary" className={cn("text-xs mt-1", getRoleColor(profile?.role))}>
                 {getRoleDisplayName(profile?.role)}
-              </span>
+              </Badge>
             </div>
           </div>
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={onSignOut}
-            className={cn(
-              "w-full h-11 font-medium transition-all duration-200",
-              "border-red-200 dark:border-red-800 text-red-600 dark:text-red-400",
-              "hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 hover:shadow-sm"
-            )}
+            className="w-full h-11 font-medium text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             <LogOut className="h-4 w-4" />
             {open && <span className="ml-2">Sign Out</span>}
           </Button>
         </div>
       </SidebarContent>
-
-      <style>{`
-        .scrollbar-hide {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-default::-webkit-scrollbar {
-          display: block;
-          width: 6px;
-        }
-        .scrollbar-default::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .scrollbar-default::-webkit-scrollbar-thumb {
-          background: rgba(156, 163, 175, 0.5);
-          border-radius: 3px;
-        }
-        .scrollbar-default::-webkit-scrollbar-thumb:hover {
-          background: rgba(156, 163, 175, 0.8);
-        }
-      `}</style>
     </Sidebar>
   );
 };
