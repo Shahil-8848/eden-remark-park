@@ -11,6 +11,8 @@ import TeacherDashboard from './TeacherDashboard';
 import UserManagement from './UserManagement';
 import TeacherAssignment from './TeacherAssignment';
 import StudentSearch from './StudentSearch';
+import TestManagement from './TestManagement';
+import TestResults from './TestResults';
 
 const MainDashboard = () => {
   const { profile, signOut } = useAuth();
@@ -65,9 +67,9 @@ const MainDashboard = () => {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full">
         {/* Global trigger in header */}
-        <header className="fixed top-0 left-0 right-0 z-50 h-12 flex items-center bg-background border-b border-border lg:hidden">
+        <header className="fixed top-0 left-0 right-0 z-50 h-12 flex items-center border-b lg:hidden">
           <SidebarTrigger className="ml-2" />
           <div className="flex items-center gap-2 ml-4">
             <div className="p-1 bg-primary/10 rounded">
@@ -92,7 +94,7 @@ const MainDashboard = () => {
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
           {/* Desktop trigger */}
-          <div className="hidden lg:flex items-center h-12 border-b border-border px-4">
+          <div className="hidden lg:flex items-center h-12 border-b px-4">
             <SidebarTrigger />
           </div>
           
@@ -106,6 +108,10 @@ const MainDashboard = () => {
                 students={students}
                 classes={classes}
               />
+            ) : selectedView === 'test-management' ? (
+              <TestManagement userId={profile?.user_id || ''} />
+            ) : selectedView === 'test-results' ? (
+              <TestResults />
             ) : selectedClass ? (
               <StudentList
                 classNumber={selectedClass}

@@ -131,7 +131,7 @@ export const useStudents = () => {
   };
 
   // For teachers, only fetch students from their assigned classes after assignedClasses are loaded
-  const fetchStudents = async () => {
+  const fetchStudents = async (limit?: number, offset?: number) => {
     setLoading(true);
     
     try {
@@ -139,12 +139,8 @@ export const useStudents = () => {
         .from('students')
         .select(`
           *,
-          classes (number, section),
-          remarks (
-            *,
-            profiles (full_name)
-          )
-        `);
+          classes (number, section)
+        `, { count: 'exact' });
 
       // For teachers, only fetch students from their assigned classes
       if (profile?.role === 'teacher') {
@@ -158,22 +154,48 @@ export const useStudents = () => {
         query = query.in('class_id', assignedClassIds);
       }
 
+      // Add pagination if specified
+      if (limit) {
+        query = query.range(offset || 0, (offset || 0) + limit - 1);
+      }
+
       query = query.order('name');
 
-      const { data, error } = await query;
+      const { data: studentsData, error: studentsError } = await query;
 
-      if (error) {
-        console.error('Error fetching students:', error);
+      if (studentsError) {
+        console.error('Error fetching students:', studentsError);
         toast.error('Failed to fetch students');
         setStudents([]);
-      } else {
-        const studentsWithAverage = (data || []).map(student => ({
-          ...student,
-          averageRating: student.remarks && student.remarks.length > 0 
-            ? student.remarks.reduce((acc: number, remark: any) => acc + remark.rating, 0) / student.remarks.length
-            : 0
-        }));
+        setLoading(false);
+        return;
+      }
+
+      // Fetch remarks separately for better performance
+      const studentIds = (studentsData || []).map(s => s.id);
+      
+      if (studentIds.length > 0) {
+        const { data: remarksData } = await supabase
+          .from('remarks')
+          .select(`
+            *,
+            profiles (full_name)
+          `)
+          .in('student_id', studentIds);
+
+        const studentsWithAverage = (studentsData || []).map(student => {
+          const studentRemarks = (remarksData || []).filter(r => r.student_id === student.id);
+          return {
+            ...student,
+            remarks: studentRemarks,
+            averageRating: studentRemarks.length > 0 
+              ? studentRemarks.reduce((acc: number, remark: any) => acc + remark.rating, 0) / studentRemarks.length
+              : 0
+          };
+        });
         setStudents(studentsWithAverage);
+      } else {
+        setStudents([]);
       }
     } catch (error) {
       console.error('Unexpected error fetching students:', error);
